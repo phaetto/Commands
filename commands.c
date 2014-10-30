@@ -249,7 +249,7 @@ static byte* ClearCommandImplementation(const char* args[], struct CommandEngine
 
 const Command ClearCommand = {
     "clear",
-    (ExecuteMethodType)ClearCommandImplementation,
+    ClearCommandImplementation,
     "Clears the console."
 };
 
@@ -311,7 +311,7 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
 
 const Command HelpCommand = {
     "help",
-    (ExecuteMethodType)HelpCommandImplementation,
+    HelpCommandImplementation,
     "Provides descriptions for commands."
 };
 
