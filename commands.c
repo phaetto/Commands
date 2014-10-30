@@ -211,7 +211,6 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
             }
         }
     } else {
-        // Command not found
         if (commandEngine->RunningApplication != NULL) {
             commandEngine->Status = CanRead;
         } else if (commandEngine->WriteError != NULL) {
@@ -319,44 +318,42 @@ const Command HelpCommand = {
 ////////////////////////////////////////////////////////////////////////////////
 static int StringToArgs(char *pRawString, const char *argv[])
 {
-  size_t argc = 0, i = 0, strsize = 0;
+    size_t argc = 0, i = 0, strsize = 0;
 
-  if(pRawString == NULL)
-    return 0;
-
-  strsize = strlen(pRawString);
-
-  while(argc < MAX_CMD_ARGS) {
-
-    // skip white space characters of string head
-    while ((*pRawString == ' ') || (*pRawString == '\t')) {
-      ++pRawString;
-      if (++i >= strsize) {
-        return (argc);
-      }
+    if(pRawString == NULL) {
+        return 0;
     }
 
-    if (*pRawString == '\0') {
-      argv[argc] = NULL;
-      return (argc);
+    strsize = strlen(pRawString);
+
+    while(argc < MAX_CMD_ARGS) {
+        while ((*pRawString == ' ') || (*pRawString == '\t')) {
+            ++pRawString;
+            if (++i >= strsize) {
+                return (argc);
+            }
+        }
+
+        if (*pRawString == '\0') {
+            argv[argc] = NULL;
+            return (argc);
+        }
+
+        argv[argc++] = pRawString;
+
+        while (*pRawString && (*pRawString != ' ') && (*pRawString != '\t')) {
+            ++pRawString;
+        }
+
+        if (*pRawString == '\0') {
+            argv[argc] = NULL;
+            return (argc);
+        }
+
+        *pRawString++ = '\0';
     }
 
-    argv[argc++] = pRawString;
-
-    // find end of string
-    while (*pRawString && (*pRawString != ' ') && (*pRawString != '\t')) {
-      ++pRawString;
-    }
-
-    if (*pRawString == '\0') {
-        argv[argc] = NULL;
-        return (argc);
-    }
-
-    *pRawString++ = '\0';
-  }
-
-  return (0);
+    return (0);
 }
 
 #endif
