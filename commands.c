@@ -136,6 +136,35 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
 // Private methods
 ////////////////////////////////////////////////////////////////////////////////
 
+static const char** CheckArguments(struct CommandEngine* commandEngine)
+{
+    static const char* argv[MAX_CMD_ARGS];
+    argv[0] = NULL;
+
+    byte * p = commandEngine->CommandBuffer;
+    while(*p != ' ')
+    {
+        if (*p == NULL) {
+            return argv;
+        }
+
+        ++p;
+    }
+
+    while(*p == ' ')
+    {
+        if (*p == NULL) {
+            return argv;
+        }
+
+        ++p;
+    }
+
+    StringToArgs(p, argv);
+
+    return argv;
+}
+
 static const Command* CheckCommand(struct CommandEngine* commandEngine)
 {
     byte * p = commandEngine->CommandBuffer;
@@ -171,35 +200,6 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
     }
 
     return (Command*) NULL;
-}
-
-static const char** CheckArguments(struct CommandEngine* commandEngine)
-{
-    static const char* argv[MAX_CMD_ARGS];
-    argv[0] = NULL;
-    
-    byte * p = commandEngine->CommandBuffer;
-    while(*p != ' ')
-    {
-        if (*p == NULL) {
-            return argv;
-        }
-        
-        ++p;
-    }
-
-    while(*p == ' ')
-    {
-        if (*p == NULL) {
-            return argv;
-        }
-        
-        ++p;
-    }
-
-    StringToArgs(p, argv);
-
-    return argv;
 }
 
 static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
