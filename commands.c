@@ -52,6 +52,8 @@ void DoTasks(CommandEngine* commandEngine)
                 commandEngine->WriteToOutput(commandEngine->Prompt);
             }
             break;
+        case CanRead:
+            break;
         default:
             if (commandEngine->WriteError != NULL) {
                 sprintf(stringFormatBuffer, "Invalid status with number %d%s", commandEngine->Status, Crlf);
