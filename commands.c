@@ -193,7 +193,7 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
         {
             commandEngine->RunningApplication = commandEngine->RegisteredApplications[i];
             if (commandEngine->RunningApplication->OnStart != NULL) {
-                commandEngine->RunningApplication->OnStart(commandEngine);
+                commandEngine->RunningApplication->OnStart(CheckArguments(commandEngine), commandEngine);
             }
             break;
         }

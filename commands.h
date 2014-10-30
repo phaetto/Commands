@@ -22,7 +22,8 @@ struct CommandEngine;
 typedef unsigned char byte;
 
 typedef void (*WriterMethodType)(const char *string);
-typedef byte* (*ExecuteMethodType)(const char* args[], struct CommandEngine* commandEngine);
+typedef byte* (*CommandExecuteMethodType)(const char* args[], struct CommandEngine* commandEngine);
+typedef void (*ApplicationLoadMethodType)(const char* args[], struct CommandEngine* commandEngine);
 typedef void (*ExecuteApplicationMethodType)(const char input, struct CommandEngine* commandEngine);
 typedef void (*ApplicationMethodType)(struct CommandEngine* commandEngine);
 
@@ -61,7 +62,7 @@ typedef enum {
 
 typedef struct Command {
     const char * Name;
-    ExecuteMethodType Execute;
+    CommandExecuteMethodType Execute;
     const char * HelpText;
 } Command;
 
@@ -69,7 +70,7 @@ typedef struct Application {
     const char * Name;
     const char * HelpText;
     ExecuteApplicationMethodType Execute;
-    ApplicationMethodType OnStart;
+    ApplicationLoadMethodType OnStart;
     ApplicationMethodType OnClose;
 } Application;
 
