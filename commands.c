@@ -84,7 +84,13 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
     }
 
     if (keystroke == RETURN_ASCII) {
-        commandEngine->Status = CanParseForCommand;
+        if (commandEngine->BufferPosition != 0) {
+            commandEngine->Status = CanParseForCommand;
+        }
+        else {
+            commandEngine->Status = Initialize;
+            commandEngine->WriteToOutput(Crlf);
+        }
         return;
     }
 
@@ -102,7 +108,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 }
                 break;
             case RETURN_ASCII:
-                // Do not print anything
+                // Do not print CRLF here
                 break;
             default:
                 if (keystroke > 31)
