@@ -9,13 +9,6 @@ extern "C" {
 // Definitions
 ////////////////////////////////////////////////////////////////////////////////
 
-// Optional definitions:
-/*
- * COMMANDS_SMALL_FOOTPRINT:
- * Removes formatted messages and predefined commands.
- */
-#define COMMANDS_SMALL_FOOTPRINT
-
 #ifndef MAX_CMD_ARGS
 #define MAX_CMD_ARGS 3
 #endif
@@ -53,10 +46,8 @@ typedef void (*ApplicationMethodType)(struct CommandEngine* commandEngine);
 // Default Commands
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMANDS_SMALL_FOOTPRINT
 extern const struct Command ClearCommand;
 extern const struct Command HelpCommand;
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Structures

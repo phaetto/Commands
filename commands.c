@@ -51,12 +51,8 @@ void DoTasks(CommandEngine* commandEngine)
             break;
         default:
             if (commandEngine->WriteError != NULL) {
-#ifndef COMMANDS_SMALL_FOOTPRINT
                 sprintf(stringFormatBuffer, "Invalid status with number %d" CMD_CRLF, commandEngine->Status);
                 commandEngine->WriteError(stringFormatBuffer);
-#else
-                commandEngine->WriteError("Invalid status." CMD_CRLF);
-#endif
             }
             break;
     }
@@ -120,12 +116,8 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 }
                 else
                 {
-#ifndef COMMANDS_SMALL_FOOTPRINT
                     sprintf(stringFormatBuffer, "ASCII character 0x%02x is not supported." CMD_CRLF, keystroke);
                     commandEngine->WriteError(stringFormatBuffer);
-#else
-                    commandEngine->WriteError("ASCII character is not supported." CMD_CRLF);
-#endif
                 }
         }
 
@@ -201,7 +193,8 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
         {
             commandEngine->RunningApplication = commandEngine->RegisteredApplications[i];
             if (commandEngine->RunningApplication->OnStart != NULL) {
-                commandEngine->RunningApplication->OnStart(CheckArguments(commandEngine), commandEngine);
+                const char ** args = CheckArguments(commandEngine);
+                commandEngine->RunningApplication->OnStart(args, commandEngine);
             }
             break;
         }
@@ -225,12 +218,8 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
         if (commandEngine->RunningApplication != NULL) {
             commandEngine->Status = CanRead;
         } else if (commandEngine->WriteError != NULL) {
-#ifndef COMMANDS_SMALL_FOOTPRINT
             sprintf(stringFormatBuffer, "Command '%s' cound not be found" CMD_CRLF, commandEngine->CommandBuffer);
             commandEngine->WriteError(stringFormatBuffer);
-#else
-            commandEngine->WriteError("Command cound not be found" CMD_CRLF);
-#endif
         }
     }
 
@@ -254,7 +243,6 @@ void CloseApplication(CommandEngine* commandEngine)
 // Default Commands
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef COMMANDS_SMALL_FOOTPRINT
 // Clear command
 static byte* ClearCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
@@ -315,8 +303,6 @@ const Command HelpCommand = {
     HelpCommandImplementation,
     "Provides descriptions for commands."
 };
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper methods
