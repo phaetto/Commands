@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "commands.h"
 
@@ -10,23 +11,17 @@
 // Imports
 ////////////////////////////////////////////////////////////////////////////////
 
-extern char * strncpy(char *, const char *, size_t);
-extern size_t strlen(const char *);
+extern char *   strncpy(char *, const char *, size_t);
+extern size_t   strlen(const char *);
+extern int      sprintf(char *, const char *, ...);
+extern int	strcmp(const char *, const char *);
 
 ////////////////////////////////////////////////////////////////////////////////
-// Constants
+// Local buffers
 ////////////////////////////////////////////////////////////////////////////////
 
-const char* Crlf = "\r\n";
-const char* ClearScreen = "\x1B[2J\x1B[;H";
-const char* MakeWhite = "\x1B[37;40m";
-const char* MakeYellow = "\x1B[33;40m";
-const char* MakeGreen = "\x1B[32;40m";
-const char* MakeRed = "\x1B[31;40m";
-const char* MakeBold = "\x1B[1m";
-const char* ClearAttributes = "\x1B[0m";
-char stringFormatBuffer[0x3F];
-char characterEchoBuffer[2] = "\0\0";
+static char characterEchoBuffer[2] = "\0\0";
+static char stringFormatBuffer[COMMANDS_BUFFER_SIZE];
 
 ////////////////////////////////////////////////////////////////////////////////
 // Public methods
@@ -56,8 +51,12 @@ void DoTasks(CommandEngine* commandEngine)
             break;
         default:
             if (commandEngine->WriteError != NULL) {
-                sprintf(stringFormatBuffer, "Invalid status with number %d%s", commandEngine->Status, Crlf);
+#ifndef COMMANDS_SMALL_FOOTPRINT
+                sprintf(stringFormatBuffer, "Invalid status with number %d" CMD_CRLF, commandEngine->Status);
                 commandEngine->WriteError(stringFormatBuffer);
+#else
+                commandEngine->WriteError("Invalid status." CMD_CRLF);
+#endif
             }
             break;
     }
@@ -89,7 +88,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
         }
         else {
             commandEngine->Status = Initialize;
-            commandEngine->WriteToOutput(Crlf);
+            commandEngine->WriteToOutput(CMD_CRLF);
         }
         return;
     }
@@ -121,8 +120,12 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 }
                 else
                 {
-                    sprintf(stringFormatBuffer, "ASCII character 0x%02x is not supported.%s", keystroke, Crlf);
+#ifndef COMMANDS_SMALL_FOOTPRINT
+                    sprintf(stringFormatBuffer, "ASCII character 0x%02x is not supported." CMD_CRLF, keystroke);
                     commandEngine->WriteError(stringFormatBuffer);
+#else
+                    commandEngine->WriteError("ASCII character is not supported." CMD_CRLF);
+#endif
                 }
         }
 
@@ -133,8 +136,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
 
     // Buffer overflow, we have to lose data
     if (commandEngine->WriteError != NULL) {
-        sprintf(stringFormatBuffer, "Buffer overflow!%s", Crlf);
-        commandEngine->WriteError(stringFormatBuffer);
+        commandEngine->WriteError("Buffer overflow!" CMD_CRLF);
     }
 }
 
@@ -179,8 +181,8 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
         ++p;
     }
 
-    const unsigned short index = (p - commandEngine->CommandBuffer);
-    char commandName[commandEngine->CommandBufferSize];
+    unsigned short index = (p - commandEngine->CommandBuffer);
+    char * commandName = stringFormatBuffer;
     strncpy(commandName, commandEngine->CommandBuffer, index);
     commandName[index] = NULL;
 
@@ -212,7 +214,8 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
 {
     if (command != NULL) {
         if (commandEngine->WriteToOutput != NULL) {
-            const char* output = command->Execute(CheckArguments(commandEngine), commandEngine);
+            const char ** args = CheckArguments(commandEngine);
+            const char* output = command->Execute(args, commandEngine);
             
             if (output != NULL) {
                 commandEngine->WriteToOutput(output);
@@ -222,8 +225,12 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
         if (commandEngine->RunningApplication != NULL) {
             commandEngine->Status = CanRead;
         } else if (commandEngine->WriteError != NULL) {
-            sprintf(stringFormatBuffer, "Command '%s' cound not be found%s", commandEngine->CommandBuffer, Crlf);
+#ifndef COMMANDS_SMALL_FOOTPRINT
+            sprintf(stringFormatBuffer, "Command '%s' cound not be found" CMD_CRLF, commandEngine->CommandBuffer);
             commandEngine->WriteError(stringFormatBuffer);
+#else
+            commandEngine->WriteError("Command cound not be found" CMD_CRLF);
+#endif
         }
     }
 
@@ -247,10 +254,11 @@ void CloseApplication(CommandEngine* commandEngine)
 // Default Commands
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifndef COMMANDS_SMALL_FOOTPRINT
 // Clear command
 static byte* ClearCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
-    return (byte*)ClearScreen;
+    return (byte*)CMD_CLEARSCREEN;
 }
 
 const Command ClearCommand = {
@@ -262,55 +270,42 @@ const Command ClearCommand = {
 // Help command
 static byte* HelpCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
-    WriteString(MakeBold);
-    WriteString(MakeGreen);
-    WriteString("\r\n***********************************************************************\r\n");
-    WriteString("**");
-    WriteString(MakeWhite);
-    WriteString(" Available commands in this terminal                               ");
-    WriteString(MakeGreen);
-    WriteString("**\r\n");
-    WriteString("***********************************************************************\r\n\r\n");
-    WriteString(ClearAttributes);
-    
-    WriteString(MakeGreen);
-    WriteString("Commands:\r\n");
-    WriteString(ClearAttributes);
+    commandEngine->WriteToOutput(CMD_MAKEBOLD CMD_MAKEGREEN CMD_CRLF "***********************************************************************"
+            CMD_CRLF "**" CMD_MAKEWHITE " Available commands in this terminal                               "
+            CMD_MAKEGREEN "**"
+            CMD_CRLF "***********************************************************************"
+            CMD_CRLF CMD_CRLF CMD_CLEARATTRIBUTES
+            CMD_MAKEGREEN "Commands:"
+            CMD_CRLF CMD_CLEARATTRIBUTES);
 
     unsigned short i = 0;
     for(i = 0; i < commandEngine->RegisteredCommandsCount; ++i)
     {
         const char * description = commandEngine->RegisteredCommands[i]->HelpText != NULL
             ? commandEngine->RegisteredCommands[i]->HelpText
-            : "[ No description ]";
+            : "[ No description ]\0";
 
-        sprintf(stringFormatBuffer, "%s%s\t%s%s",
+        sprintf(stringFormatBuffer, "%s" CMD_CRLF "\t%s" CMD_CRLF,
                 commandEngine->RegisteredCommands[i]->Name,
-                Crlf,
-                description,
-                Crlf);
+                description);
         commandEngine->WriteToOutput(stringFormatBuffer);
     }
 
-    WriteString(MakeGreen);
-    WriteString("\r\nApplications:\r\n");
-    WriteString(ClearAttributes);
+    commandEngine->WriteToOutput(CMD_MAKEGREEN CMD_CRLF "Applications:" CMD_CRLF CMD_CLEARATTRIBUTES);
 
     for(i = 0; i < commandEngine->RegisteredApplicationsCount; ++i)
     {
         const char * description = commandEngine->RegisteredApplications[i]->HelpText != NULL
             ? commandEngine->RegisteredApplications[i]->HelpText
-            : "[ No description ]";
+            : "[ No description ]\0";
 
-        sprintf(stringFormatBuffer, "%s%s\t%s%s",
+        sprintf(stringFormatBuffer, "%s" CMD_CRLF "\t%s" CMD_CRLF,
                 commandEngine->RegisteredApplications[i]->Name,
-                Crlf,
-                description,
-                Crlf);
+                description);
         commandEngine->WriteToOutput(stringFormatBuffer);
     }
 
-    commandEngine->WriteToOutput("\r\n");
+    commandEngine->WriteToOutput(CMD_CRLF);
 
     return (byte*)NULL;
 }
@@ -320,6 +315,8 @@ const Command HelpCommand = {
     HelpCommandImplementation,
     "Provides descriptions for commands."
 };
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper methods
