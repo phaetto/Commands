@@ -80,9 +80,7 @@ typedef struct CommandEngine {
     byte *CommandBuffer;
     const unsigned int CommandBufferSize;
     const Command** RegisteredCommands;
-    const unsigned short RegisteredCommandsCount;
     const Application** RegisteredApplications;
-    const unsigned short RegisteredApplicationsCount;
     WriterMethodType WriteToOutput;
     WriterMethodType WriteError;
     const char* Prompt;

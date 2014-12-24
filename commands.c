@@ -188,7 +188,7 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
     commandName[index] = NULL;
 
     unsigned short i = 0;
-    for(i = 0; i < commandEngine->RegisteredCommandsCount; ++i)
+    for(i = 0; commandEngine->RegisteredCommands[i] != NULL; ++i)
     {
         if (strcmp(commandName, commandEngine->RegisteredCommands[i]->Name) == 0)
         {
@@ -196,7 +196,7 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
         }
     }
 
-    for(i = 0; i < commandEngine->RegisteredApplicationsCount; ++i)
+    for(i = 0; commandEngine->RegisteredApplications[i] != NULL; ++i)
     {
         if (strcmp(commandName, commandEngine->RegisteredApplications[i]->Name) == 0)
         {
@@ -276,7 +276,7 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
             CMD_CRLF CMD_CLEARATTRIBUTES);
 
     unsigned short i = 0;
-    for(i = 0; i < commandEngine->RegisteredCommandsCount; ++i)
+    for(i = 0; commandEngine->RegisteredCommands[i] != NULL; ++i)
     {
         const char * description = commandEngine->RegisteredCommands[i]->HelpText != NULL
             ? commandEngine->RegisteredCommands[i]->HelpText
@@ -290,7 +290,7 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
 
     commandEngine->WriteToOutput(CMD_MAKEGREEN CMD_CRLF "Applications:" CMD_CRLF CMD_CLEARATTRIBUTES);
 
-    for(i = 0; i < commandEngine->RegisteredApplicationsCount; ++i)
+    for(i = 0; commandEngine->RegisteredApplications[i] != NULL; ++i)
     {
         const char * description = commandEngine->RegisteredApplications[i]->HelpText != NULL
             ? commandEngine->RegisteredApplications[i]->HelpText
