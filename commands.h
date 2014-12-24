@@ -99,15 +99,6 @@ void DoTasks(CommandEngine* commandEngine);
 void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke);
 void CloseApplication(CommandEngine* commandEngine);
 
-////////////////////////////////////////////////////////////////////////////////
-// Private methods
-////////////////////////////////////////////////////////////////////////////////
-
-static void ProcessBuffer(CommandEngine* commandEngine);
-static const Command* CheckCommand(struct CommandEngine* commandEngine);
-static void ExecuteCommand(struct CommandEngine* commandEngine, const Command* command);
-static int StringToArgs(char *pRawString, const char *argv[]);
-
 #ifdef	__cplusplus
 }
 #endif
