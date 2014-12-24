@@ -87,6 +87,7 @@ typedef struct CommandEngine {
     unsigned short BufferPosition;
     CommandEngineStatus Status;
     const Application* RunningApplication;
+    const Command * ParsedCommand;
 } CommandEngine;
 
 ////////////////////////////////////////////////////////////////////////////////

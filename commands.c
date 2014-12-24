@@ -38,17 +38,15 @@ static char stringFormatBuffer[COMMANDS_BUFFER_SIZE];
 
 void DoTasks(CommandEngine* commandEngine)
 {
-    static const Command * parsedCommand;
-
     switch(commandEngine->Status)
     {
         case CanParseForCommand:
-            parsedCommand = CheckCommand(commandEngine);
+            commandEngine->ParsedCommand = CheckCommand(commandEngine);
             commandEngine->Status = CanExecuteCommand;
             break;
         case CanExecuteCommand:
-            ExecuteCommand(commandEngine, parsedCommand);
-            parsedCommand = NULL;
+            ExecuteCommand(commandEngine, commandEngine->ParsedCommand);
+            commandEngine->ParsedCommand = NULL;
         case Initialize:
             commandEngine->Status = CanRead;
             if (commandEngine->Prompt != NULL
