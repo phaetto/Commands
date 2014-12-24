@@ -41,6 +41,7 @@ typedef byte* (*CommandExecuteMethodType)(const char* args[], struct CommandEngi
 typedef void (*ApplicationLoadMethodType)(const char* args[], struct CommandEngine* commandEngine);
 typedef void (*ExecuteApplicationMethodType)(const char input, struct CommandEngine* commandEngine);
 typedef void (*ApplicationMethodType)(struct CommandEngine* commandEngine);
+typedef byte (*ServiceMethodType)(byte state, struct CommandEngine* commandEngine);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Default Commands
@@ -76,17 +77,34 @@ typedef struct Application {
     ApplicationMethodType OnClose;
 } Application;
 
+//Service wellknow lifecycle states
+typedef enum {
+    Starting = 0x00,
+    Stopped = 0xFF,
+} ServiceStatus;
+
+typedef struct Service {
+    const char * Name;
+    const char * HelpText;
+    ServiceMethodType Run;
+    byte State;
+} Service;
+
 typedef struct CommandEngine {
     byte *CommandBuffer;
     const unsigned int CommandBufferSize;
     const Command** RegisteredCommands;
     const Application** RegisteredApplications;
+    Service** RegisteredServices;
     WriterMethodType WriteToOutput;
     WriterMethodType WriteError;
     const char* Prompt;
+    // Private fields
     unsigned short BufferPosition;
     CommandEngineStatus Status;
     const Application* RunningApplication;
+    byte ServiceCount;
+    byte ServiceRunning;
     const Command * ParsedCommand;
 } CommandEngine;
 

@@ -23,6 +23,7 @@ extern int	strcmp(const char *, const char *);
 static void ProcessBuffer(CommandEngine* commandEngine);
 static const Command* CheckCommand(struct CommandEngine* commandEngine);
 static void ExecuteCommand(struct CommandEngine* commandEngine, const Command* command);
+static void ExecuteService(CommandEngine* commandEngine);
 static int StringToArgs(char *pRawString, const char *argv[]);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,13 +49,21 @@ void DoTasks(CommandEngine* commandEngine)
             ExecuteCommand(commandEngine, commandEngine->ParsedCommand);
             commandEngine->ParsedCommand = NULL;
         case Initialize:
+            commandEngine->ServiceCount = 0;
+            commandEngine->ServiceRunning = 0;
             commandEngine->Status = CanRead;
             if (commandEngine->Prompt != NULL
                     && commandEngine->RunningApplication == NULL) {
                 commandEngine->WriteToOutput(commandEngine->Prompt);
             }
+
+            while(commandEngine->RegisteredServices[commandEngine->ServiceCount] != NULL)
+            {
+                ++commandEngine->ServiceCount;
+            }
             break;
         case CanRead:
+            ExecuteService(commandEngine);
             break;
         default:
             if (commandEngine->WriteError != NULL) {
@@ -236,6 +245,39 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
     return;
 }
 
+static void ExecuteService(CommandEngine* commandEngine)
+{
+    if (commandEngine->ServiceCount == 0)
+    {
+        return;
+    }
+
+    if (commandEngine->RegisteredServices[commandEngine->ServiceRunning] == NULL)
+    {
+        commandEngine->ServiceRunning = 0;
+    }
+
+    byte referenceToServiceRunning = commandEngine->ServiceRunning;
+    while(commandEngine->RegisteredServices[commandEngine->ServiceRunning]->State == Stopped)
+    {
+        if (commandEngine->ServiceRunning == referenceToServiceRunning)
+        {
+            return;
+        }
+
+        ++commandEngine->ServiceRunning;
+
+        if (commandEngine->RegisteredServices[commandEngine->ServiceRunning] == NULL) {
+            commandEngine->ServiceRunning = 0;
+        }
+    }
+
+    Service * service = commandEngine->RegisteredServices[commandEngine->ServiceRunning];
+    service->State = service->Run(service->State, commandEngine);
+    ++commandEngine->ServiceRunning;
+    return;
+}
+
 void CloseApplication(CommandEngine* commandEngine)
 {
     if (commandEngine->RunningApplication->OnClose != NULL) {
@@ -296,6 +338,28 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
 
         sprintf(stringFormatBuffer, "%s" CMD_CRLF "\t%s" CMD_CRLF,
                 commandEngine->RegisteredApplications[i]->Name,
+                description);
+        commandEngine->WriteToOutput(stringFormatBuffer);
+    }
+
+    commandEngine->WriteToOutput(CMD_MAKEGREEN CMD_CRLF "Services:" CMD_CRLF CMD_CLEARATTRIBUTES);
+
+    for(i = 0; commandEngine->RegisteredServices[i] != NULL; ++i)
+    {
+        const char * description = commandEngine->RegisteredServices[i]->HelpText != NULL
+            ? commandEngine->RegisteredServices[i]->HelpText
+            : "[ No description ]\0";
+
+        const char * state = commandEngine->RegisteredServices[i]->State == Stopped
+            ? "Stopped"
+            : commandEngine->RegisteredServices[i]->State == Starting
+                ? "Starting"
+                : "Running";
+
+        sprintf(stringFormatBuffer, "%s\t\t[%s/0x%02x]" CMD_CRLF "\t%s" CMD_CRLF,
+                commandEngine->RegisteredServices[i]->Name,
+                state,
+                commandEngine->RegisteredServices[i]->State,
                 description);
         commandEngine->WriteToOutput(stringFormatBuffer);
     }
