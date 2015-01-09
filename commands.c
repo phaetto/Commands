@@ -351,12 +351,12 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
             : "[ No description ]\0";
 
         const char * state = commandEngine->RegisteredServices[i]->State == Stopped
-            ? "Stopped"
+            ? CMD_MAKERED "Stopped" CMD_CLEARATTRIBUTES
             : commandEngine->RegisteredServices[i]->State == Starting
-                ? "Starting"
-                : "Running";
+                ? CMD_MAKEGREEN "Starting" CMD_CLEARATTRIBUTES
+                : CMD_MAKEGREEN "Running" CMD_CLEARATTRIBUTES;
 
-        sprintf(stringFormatBuffer, "%s\t\t[%s/0x%02x]" CMD_CRLF "\t%s" CMD_CRLF,
+        sprintf(stringFormatBuffer, "%s\t\t[%s] / [0x%02x]" CMD_CRLF "\t%s" CMD_CRLF,
                 commandEngine->RegisteredServices[i]->Name,
                 state,
                 commandEngine->RegisteredServices[i]->State,
