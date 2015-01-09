@@ -13,7 +13,9 @@ byte CommandBuffer[MAX_BUFFER];
 ////////////////////////////////////////////////////////////////////////////////
 // Example command implementation
 //      Commands run on demand from terminal. They can have variable arguments,
-//      like any terminal command.
+//      like any terminal command and as long as they are executing the other
+//      parts of the system are halted. If asynchronisity is needed, then pair
+//      it with a background service.
 //
 //      Usage: example-command [???]
 ////////////////////////////////////////////////////////////////////////////////
