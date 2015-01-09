@@ -56,7 +56,7 @@ void ExampleAppCloseImplementation(struct CommandEngine* commandEngine)
     commandEngine->WriteToOutput("\r\n[Ended]\r\n");
 }
 
-const Application ControlApplication = {
+const Application ExampleApplication = {
     "example.exe",
     "Example process",
     ExampleAppImplementation,
@@ -68,6 +68,14 @@ const Application ControlApplication = {
 // Example background services
 ////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////
+// Background service that runs forever
+//      Example of a service that recycles states forever doing a task. The
+//      state implementations should be as smaller as possible to break the
+//      computation time across services and processes/commands.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 byte ServiceExample1Implementation(byte state, struct CommandEngine* commandEngine)
 {
     // Do something depending the state
@@ -77,6 +85,9 @@ byte ServiceExample1Implementation(byte state, struct CommandEngine* commandEngi
             return 0x01;
         case 0x01:
             // TODO: Loops and processes some input
+            return 0x01;
+        case 0x02:
+            // TODO: Does something more specific, but still loops to state 0x01
             return 0x01;
         default:
             break;
@@ -91,6 +102,13 @@ Service Example1Service = {
     ServiceExample1Implementation,
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Background service that runs once
+//      Example of a service that does a task after is has been requested from
+//      a process or a command. This service starts as stopped.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 byte ServiceExample2Implementation(byte state, struct CommandEngine* commandEngine)
 {
     // Do something depending the state
@@ -103,7 +121,7 @@ byte ServiceExample2Implementation(byte state, struct CommandEngine* commandEngi
             return 0x02;
         case 0x02:
         default:
-            // TODO: Step 2 and stopping
+            // TODO: Step 2 then stopping
             break;
     }
 
@@ -114,6 +132,7 @@ Service Example2Service = {
     "Example service 2",
     "Example background service that runs on demand",
     ServiceExample2Implementation,
+    Stopped,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +145,7 @@ const Command* Commands[] = {
 };
 
 const Application* Applications[] = {
-    &ControlApplication,
+    &ExampleApplication,
     NULL
 };
 
