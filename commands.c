@@ -260,15 +260,15 @@ static void ExecuteService(CommandEngine* commandEngine)
     byte referenceToServiceRunning = commandEngine->ServiceRunning;
     while(commandEngine->RegisteredServices[commandEngine->ServiceRunning]->State == Stopped)
     {
-        if (commandEngine->ServiceRunning == referenceToServiceRunning)
-        {
-            return;
-        }
-
         ++commandEngine->ServiceRunning;
 
         if (commandEngine->RegisteredServices[commandEngine->ServiceRunning] == NULL) {
             commandEngine->ServiceRunning = 0;
+        }
+        
+        if (commandEngine->ServiceRunning == referenceToServiceRunning)
+        {
+            return;
         }
     }
 
