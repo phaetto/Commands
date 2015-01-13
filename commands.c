@@ -289,20 +289,6 @@ void CloseApplication(CommandEngine* commandEngine)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Default Commands
-////////////////////////////////////////////////////////////////////////////////
-
-// Clear command
-static byte* ClearCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
-{
-    return (byte*)CMD_CLEARSCREEN;
-}
-
-const Command ClearCommand = {
-    "clear",
-    ClearCommandImplementation,
-    "Clears the console."
-};
 
 // Help command
 static byte* HelpCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
