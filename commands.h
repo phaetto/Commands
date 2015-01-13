@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 #ifndef COMMANDS_BUFFER_SIZE
-#define COMMANDS_BUFFER_SIZE 0x3F
+#define COMMANDS_BUFFER_SIZE 0xFF
 #endif
 
 #define ESC_ASCII (0x1b)
