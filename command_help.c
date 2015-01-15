@@ -63,7 +63,7 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
         commandEngine->WriteToOutput(commandEngine->RegisteredApplications[i]->Name);
         commandEngine->WriteToOutput("\t\t[");
         commandEngine->WriteToOutput(state);
-        commandEngine->WriteToOutput("] / [");
+        commandEngine->WriteToOutput("] / [0x");
         commandEngine->WriteToOutput(hex);
         commandEngine->WriteToOutput("]" CMD_CRLF "\t");
         commandEngine->WriteToOutput(description);
