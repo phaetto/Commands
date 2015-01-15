@@ -56,8 +56,8 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
                 : CMD_MAKEGREEN "Running" CMD_CLEARATTRIBUTES;
 
         char hex[3];
-        hex[0] = TO_HEX(((commandEngine->RegisteredServices[i]->State & 0x00F0) >> 4));
-        hex[1] = TO_HEX(((commandEngine->RegisteredServices[i]->State & 0x000F)));
+        hex[0] = TO_HEX(((commandEngine->RegisteredServices[i]->State & 0xF0) >> 4));
+        hex[1] = TO_HEX(((commandEngine->RegisteredServices[i]->State & 0x0F)));
         hex[2] = '\0';
 
         commandEngine->WriteToOutput(commandEngine->RegisteredApplications[i]->Name);
