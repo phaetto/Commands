@@ -17,6 +17,10 @@ extern "C" {
 #define COMMANDS_BUFFER_SIZE 0x1F
 #endif
 
+#ifndef NULL
+#define NULL (0)
+#endif
+
 #define ESC_ASCII (0x1b)
 #define TAB_ASCII (0x09)
 #define RETURN_ASCII (0x0D)

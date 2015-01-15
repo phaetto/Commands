@@ -1,19 +1,46 @@
 #ifndef COMMANDS_C
 #define	COMMANDS_C
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-
 #include "commands.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 ////////////////////////////////////////////////////////////////////////////////
 
-extern char *   strncpy(char *, const char *, size_t);
-extern size_t   strlen(const char *);
-extern int	strcmp(const char *, const char *);
+static void strncpy(char * s1, const char * s2, unsigned short size)
+{
+    while (*s2 != '\0' && size > 0)
+    {
+        *s1 = *s2;
+        s1++;
+        s2++;
+        size--;
+    }
+}
+
+static unsigned short strlen(const char * s)
+{
+    int result = 0;
+
+    while (*s != '\0')
+    {
+        result++;
+        s++;
+    }
+
+    return result;
+}
+
+static short strcmp(const char * s1, const char * s2)
+{
+    while (*s1 != '\0' && *s2 != '\0' && *s1 == *s2)
+    {
+        s1++;
+        s2++;
+    }
+
+    return *s1 - *s2;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Private methods declarations
@@ -294,7 +321,7 @@ void CloseApplication(CommandEngine* commandEngine)
 ////////////////////////////////////////////////////////////////////////////////
 static int StringToArgs(char *pRawString, char *argv[])
 {
-    size_t argc = 0, i = 0, strsize = 0;
+    unsigned short argc = 0, i = 0, strsize = 0;
 
     if(pRawString == NULL) {
         return 0;
