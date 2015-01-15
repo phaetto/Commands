@@ -60,7 +60,7 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
         hex[1] = TO_HEX(((commandEngine->RegisteredServices[i]->State & 0x0F)));
         hex[2] = '\0';
 
-        commandEngine->WriteToOutput(commandEngine->RegisteredApplications[i]->Name);
+        commandEngine->WriteToOutput(commandEngine->RegisteredServices[i]->Name);
         commandEngine->WriteToOutput("\t\t[");
         commandEngine->WriteToOutput(state);
         commandEngine->WriteToOutput("] / [0x");
