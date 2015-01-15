@@ -174,7 +174,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
 
     // Buffer overflow, we have to lose data
     if (commandEngine->WriteError != NULL) {
-        commandEngine->WriteError("Buffer overflow!" CMD_CRLF);
+        commandEngine->WriteError(CMD_CRLF "Buffer overflow!" CMD_CRLF);
     }
 }
 
@@ -263,7 +263,9 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
         if (commandEngine->RunningApplication != NULL) {
             commandEngine->Status = CanRead;
         } else if (commandEngine->WriteError != NULL) {
-            commandEngine->WriteError("Command not found");
+            commandEngine->WriteError(CMD_CRLF "Command '");
+            commandEngine->WriteError(commandEngine->CommandBuffer);
+            commandEngine->WriteError("' not found" CMD_CRLF);
         }
     }
 
