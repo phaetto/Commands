@@ -13,7 +13,6 @@
 
 extern char *   strncpy(char *, const char *, size_t);
 extern size_t   strlen(const char *);
-extern int      sprintf(char *, const char *, ...);
 extern int	strcmp(const char *, const char *);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,14 +23,15 @@ static void ProcessBuffer(CommandEngine* commandEngine);
 static const Command* CheckCommand(struct CommandEngine* commandEngine);
 static void ExecuteCommand(struct CommandEngine* commandEngine, const Command* command);
 static void ExecuteService(CommandEngine* commandEngine);
-static int StringToArgs(char *pRawString, const char *argv[]);
+static int StringToArgs(char *pRawString, char *argv[]);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Local buffers
 ////////////////////////////////////////////////////////////////////////////////
 
-char characterEchoBuffer[2] = "\0\0";
-char stringFormatBuffer[COMMANDS_BUFFER_SIZE];
+static char characterEchoBuffer[2] = "\0\0";
+static char stringFormatBuffer[COMMANDS_BUFFER_SIZE];
+static char* argv[MAX_CMD_ARGS];
 
 ////////////////////////////////////////////////////////////////////////////////
 // Public methods
@@ -66,10 +66,7 @@ void DoTasks(CommandEngine* commandEngine)
             ExecuteService(commandEngine);
             break;
         default:
-            if (commandEngine->WriteError != NULL) {
-                sprintf(stringFormatBuffer, "Invalid status with number %d" CMD_CRLF, commandEngine->Status);
-                commandEngine->WriteError(stringFormatBuffer);
-            }
+            commandEngine->Status = Initialize;
             break;
     }
 
@@ -132,8 +129,10 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 }
                 else
                 {
-                    sprintf(stringFormatBuffer, "ASCII character 0x%02x is not supported." CMD_CRLF, keystroke);
-                    commandEngine->WriteError(stringFormatBuffer);
+                    characterEchoBuffer[0] = keystroke;
+                    commandEngine->WriteError("ASCII character ");
+                    commandEngine->WriteError(characterEchoBuffer);
+                    commandEngine->WriteError(" is not supported.");
                 }
         }
 
@@ -152,16 +151,15 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
 // Private methods
 ////////////////////////////////////////////////////////////////////////////////
 
-static const char** CheckArguments(struct CommandEngine* commandEngine)
+static void CheckArguments(struct CommandEngine* commandEngine)
 {
-    static const char* argv[MAX_CMD_ARGS];
     argv[0] = NULL;
 
     byte * p = commandEngine->CommandBuffer;
     while(*p != ' ')
     {
         if (*p == NULL) {
-            return argv;
+            return;
         }
 
         ++p;
@@ -170,7 +168,7 @@ static const char** CheckArguments(struct CommandEngine* commandEngine)
     while(*p == ' ')
     {
         if (*p == NULL) {
-            return argv;
+            return;
         }
 
         ++p;
@@ -178,7 +176,7 @@ static const char** CheckArguments(struct CommandEngine* commandEngine)
 
     StringToArgs(p, argv);
 
-    return argv;
+    return;
 }
 
 static const Command* CheckCommand(struct CommandEngine* commandEngine)
@@ -209,8 +207,8 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
         {
             commandEngine->RunningApplication = commandEngine->RegisteredApplications[i];
             if (commandEngine->RunningApplication->OnStart != NULL) {
-                const char ** args = CheckArguments(commandEngine);
-                commandEngine->RunningApplication->OnStart(args, commandEngine);
+                CheckArguments(commandEngine);
+                commandEngine->RunningApplication->OnStart((const char **)argv, commandEngine);
             }
             break;
         }
@@ -223,8 +221,8 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
 {
     if (command != NULL) {
         if (commandEngine->WriteToOutput != NULL) {
-            const char ** args = CheckArguments(commandEngine);
-            const char* output = command->Execute(args, commandEngine);
+            CheckArguments(commandEngine);
+            const char* output = command->Execute((const char **)argv, commandEngine);
             
             if (output != NULL) {
                 commandEngine->WriteToOutput(output);
@@ -234,8 +232,7 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
         if (commandEngine->RunningApplication != NULL) {
             commandEngine->Status = CanRead;
         } else if (commandEngine->WriteError != NULL) {
-            sprintf(stringFormatBuffer, "Command '%s' cound not be found" CMD_CRLF, commandEngine->CommandBuffer);
-            commandEngine->WriteError(stringFormatBuffer);
+            commandEngine->WriteError("Command not found");
         }
     }
 
@@ -291,7 +288,7 @@ void CloseApplication(CommandEngine* commandEngine)
 ////////////////////////////////////////////////////////////////////////////////
 // Helper methods
 ////////////////////////////////////////////////////////////////////////////////
-static int StringToArgs(char *pRawString, const char *argv[])
+static int StringToArgs(char *pRawString, char *argv[])
 {
     size_t argc = 0, i = 0, strsize = 0;
 

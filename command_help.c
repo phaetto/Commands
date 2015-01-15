@@ -2,8 +2,7 @@
 #include "commands.h"
 #include "command_help.h"
 
-// Imported from commands.c
-extern char stringFormatBuffer[COMMANDS_BUFFER_SIZE];
+#define TO_HEX(i) (i <= 9 ? '0' + i : 'A' - 10 + i)
 
 static byte* HelpCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
@@ -22,10 +21,10 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
             ? commandEngine->RegisteredCommands[i]->HelpText
             : "[ No description ]\0";
 
-        sprintf(stringFormatBuffer, "%s" CMD_CRLF "\t%s" CMD_CRLF,
-                commandEngine->RegisteredCommands[i]->Name,
-                description);
-        commandEngine->WriteToOutput(stringFormatBuffer);
+        commandEngine->WriteToOutput(commandEngine->RegisteredCommands[i]->Name);
+        commandEngine->WriteToOutput(CMD_CRLF "\t");
+        commandEngine->WriteToOutput(description);
+        commandEngine->WriteToOutput(CMD_CRLF);
     }
 
     commandEngine->WriteToOutput(CMD_MAKEGREEN CMD_CRLF "Applications:" CMD_CRLF CMD_CLEARATTRIBUTES);
@@ -36,10 +35,10 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
             ? commandEngine->RegisteredApplications[i]->HelpText
             : "[ No description ]\0";
 
-        sprintf(stringFormatBuffer, "%s" CMD_CRLF "\t%s" CMD_CRLF,
-                commandEngine->RegisteredApplications[i]->Name,
-                description);
-        commandEngine->WriteToOutput(stringFormatBuffer);
+        commandEngine->WriteToOutput(commandEngine->RegisteredApplications[i]->Name);
+        commandEngine->WriteToOutput(CMD_CRLF "\t");
+        commandEngine->WriteToOutput(description);
+        commandEngine->WriteToOutput(CMD_CRLF);
     }
 
     commandEngine->WriteToOutput(CMD_MAKEGREEN CMD_CRLF "Services:" CMD_CRLF CMD_CLEARATTRIBUTES);
@@ -56,12 +55,19 @@ static byte* HelpCommandImplementation(const char* args[], struct CommandEngine*
                 ? CMD_MAKEGREEN "Starting" CMD_CLEARATTRIBUTES
                 : CMD_MAKEGREEN "Running" CMD_CLEARATTRIBUTES;
 
-        sprintf(stringFormatBuffer, "%s\t\t[%s] / [0x%02x]" CMD_CRLF "\t%s" CMD_CRLF,
-                commandEngine->RegisteredServices[i]->Name,
-                state,
-                commandEngine->RegisteredServices[i]->State,
-                description);
-        commandEngine->WriteToOutput(stringFormatBuffer);
+        char hex[3];
+        hex[0] = TO_HEX(((commandEngine->RegisteredServices[i]->State & 0x00F0) >> 4));
+        hex[1] = TO_HEX(((commandEngine->RegisteredServices[i]->State & 0x000F)));
+        hex[2] = '\0';
+
+        commandEngine->WriteToOutput(commandEngine->RegisteredApplications[i]->Name);
+        commandEngine->WriteToOutput("\t\t[");
+        commandEngine->WriteToOutput(state);
+        commandEngine->WriteToOutput("] / [");
+        commandEngine->WriteToOutput(hex);
+        commandEngine->WriteToOutput("]" CMD_CRLF "\t");
+        commandEngine->WriteToOutput(description);
+        commandEngine->WriteToOutput(CMD_CRLF);
     }
 
     commandEngine->WriteToOutput(CMD_CRLF);
