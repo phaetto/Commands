@@ -129,10 +129,14 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 }
                 else
                 {
-                    characterEchoBuffer[0] = keystroke;
-                    commandEngine->WriteError("ASCII character ");
-                    commandEngine->WriteError(characterEchoBuffer);
-                    commandEngine->WriteError(" is not supported.");
+                    char hex[3];
+                    hex[0] = TO_HEX(((keystroke & 0xF0) >> 4));
+                    hex[1] = TO_HEX(((keystroke & 0x0F)));
+                    hex[2] = '\0';
+
+                    commandEngine->WriteError(CMD_CRLF "ASCII character 0x");
+                    commandEngine->WriteError(hex);
+                    commandEngine->WriteError(" is not supported." CMD_CRLF);
                 }
         }
 

@@ -2,8 +2,6 @@
 #include "commands.h"
 #include "command_help.h"
 
-#define TO_HEX(i) (i <= 9 ? '0' + i : 'A' - 10 + i)
-
 static byte* HelpCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
     commandEngine->WriteToOutput(CMD_MAKEBOLD CMD_MAKEGREEN CMD_CRLF "***********************************************************************"
