@@ -7,7 +7,7 @@ I had a need of terminal provider for software debugging and probing of microcon
 So I have made this small engine for custom predefined commands that you can easily extend.
 
 ## Testing
-I have been using PIC32 for testing this project. The family of microcontrollers must support pointers to functions (older 8-bit PIC families do not :-( ).
+I have been testing on PIC32/PIC16. The compiler for the family of microcontrollers you select must support pointers to functions.
 
 ## Features
 The command-engine includes
