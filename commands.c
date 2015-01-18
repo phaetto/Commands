@@ -46,7 +46,6 @@ static short strcmp(const char * s1, const char * s2)
 // Private methods declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-static void ProcessBuffer(CommandEngine* commandEngine);
 static const Command* CheckCommand(struct CommandEngine* commandEngine);
 static void ExecuteCommand(struct CommandEngine* commandEngine, const Command* command);
 static void ExecuteService(CommandEngine* commandEngine);
