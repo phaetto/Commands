@@ -145,6 +145,7 @@ static Service Example2Service = {
 static const Command* Commands[] = {
     &HelpCommand,
     &ClearCommand,
+    &ExampleCommand,
     NULL
 };
 
