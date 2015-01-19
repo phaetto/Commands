@@ -10,7 +10,7 @@
 #define MAX_BUFFER 0xFF
 #define NULL (0L)
 
-byte CommandBuffer[MAX_BUFFER];
+static byte CommandBuffer[MAX_BUFFER];
 
 ////////////////////////////////////////////////////////////////////////////////
 // Example command implementation
@@ -21,13 +21,13 @@ byte CommandBuffer[MAX_BUFFER];
 //
 //      Usage: example-command [???]
 ////////////////////////////////////////////////////////////////////////////////
-byte* ExampleImplementation(const char* args[], struct CommandEngine* commandEngine)
+static byte* ExampleImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
     // TODO: interact with the service
     return CMD_CRLF "Done." CMD_CRLF;
 }
 
-const Command ExampleCommand = {
+static const Command ExampleCommand = {
     "example-command",
     ExampleImplementation
 };
@@ -42,12 +42,12 @@ const Command ExampleCommand = {
 //      Usage: example.exe [???]
 ////////////////////////////////////////////////////////////////////////////////
 
-void ExampleAppImplementation(const char key, struct CommandEngine* commandEngine)
+static void ExampleAppImplementation(const char key, struct CommandEngine* commandEngine)
 {
     // TODO: Use buttons to orchestrate services
 }
 
-void ExampleAppLoadImplementation(const char* args[], struct CommandEngine* commandEngine)
+static void ExampleAppLoadImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
     commandEngine->WriteToOutput(
     CMD_CRLF "Example process"
@@ -55,12 +55,12 @@ void ExampleAppLoadImplementation(const char* args[], struct CommandEngine* comm
     CMD_CRLF);
 }
 
-void ExampleAppCloseImplementation(struct CommandEngine* commandEngine)
+static void ExampleAppCloseImplementation(struct CommandEngine* commandEngine)
 {
     commandEngine->WriteToOutput("\r\n[Ended]\r\n");
 }
 
-const Application ExampleApplication = {
+static const Application ExampleApplication = {
     "example.exe",
     "Example process",
     ExampleAppImplementation,
@@ -80,7 +80,7 @@ const Application ExampleApplication = {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-byte ServiceExample1Implementation(byte state, struct CommandEngine* commandEngine)
+static byte ServiceExample1Implementation(byte state, struct CommandEngine* commandEngine)
 {
     // Do something depending the state
     switch(state)
@@ -100,7 +100,7 @@ byte ServiceExample1Implementation(byte state, struct CommandEngine* commandEngi
     return Stopped;
 }
 
-Service Example1Service = {
+static Service Example1Service = {
     "Example service 1",
     "Example background service that runs forever",
     ServiceExample1Implementation,
@@ -113,7 +113,7 @@ Service Example1Service = {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-byte ServiceExample2Implementation(byte state, struct CommandEngine* commandEngine)
+static byte ServiceExample2Implementation(byte state, struct CommandEngine* commandEngine)
 {
     // Do something depending the state
     switch(state)
@@ -132,7 +132,7 @@ byte ServiceExample2Implementation(byte state, struct CommandEngine* commandEngi
     return Stopped;
 }
 
-Service Example2Service = {
+static Service Example2Service = {
     "Example service 2",
     "Example background service that runs on demand",
     ServiceExample2Implementation,
@@ -142,24 +142,24 @@ Service Example2Service = {
 ////////////////////////////////////////////////////////////////////////////////
 // Command engine definition
 ////////////////////////////////////////////////////////////////////////////////
-const Command* Commands[] = {
+static const Command* Commands[] = {
     &HelpCommand,
     &ClearCommand,
     NULL
 };
 
-const Application* Applications[] = {
+static const Application* Applications[] = {
     &ExampleApplication,
     NULL
 };
 
-Service* Services[] = {
+static Service* Services[] = {
     &Example1Service,
     &Example2Service,
     NULL
 };
 
-void DefaultErrorToOutput(const char *string) {
+static void DefaultErrorToOutput(const char *string) {
     WriteString(CMD_MAKEYELLOW);
     WriteString(CMD_MAKEBOLD);
     WriteString(CMD_CRLF);
