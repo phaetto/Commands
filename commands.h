@@ -47,7 +47,7 @@ typedef byte* (*CommandExecuteMethodType)(const char* args[], struct CommandEngi
 typedef void (*ApplicationLoadMethodType)(const char* args[], struct CommandEngine* commandEngine);
 typedef void (*ExecuteApplicationMethodType)(const char input, struct CommandEngine* commandEngine);
 typedef void (*ApplicationMethodType)(struct CommandEngine* commandEngine);
-typedef byte (*ServiceMethodType)(byte state, struct CommandEngine* commandEngine);
+typedef byte (*ServiceMethodType)(byte state, void* data, struct CommandEngine* commandEngine);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Structures
@@ -87,6 +87,7 @@ typedef struct Service {
     const char * HelpText;
     ServiceMethodType Run;
     byte State;
+    void * Data;
 } Service;
 
 typedef struct CommandEngine {

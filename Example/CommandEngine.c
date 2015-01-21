@@ -8,7 +8,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #define MAX_BUFFER 0xFF
-#define NULL (0L)
 
 static byte CommandBuffer[MAX_BUFFER];
 
@@ -80,7 +79,7 @@ static const Application ExampleApplication = {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-static byte ServiceExample1Implementation(byte state, struct CommandEngine* commandEngine)
+static byte ServiceExample1Implementation(byte state, void* data, struct CommandEngine* commandEngine)
 {
     // Do something depending the state
     switch(state)
@@ -113,7 +112,7 @@ static Service Example1Service = {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-static byte ServiceExample2Implementation(byte state, struct CommandEngine* commandEngine)
+static byte ServiceExample2Implementation(byte state, void* data, struct CommandEngine* commandEngine)
 {
     // Do something depending the state
     switch(state)

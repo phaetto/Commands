@@ -302,7 +302,7 @@ static void ExecuteService(CommandEngine* commandEngine)
     }
 
     Service * service = commandEngine->RegisteredServices[commandEngine->ServiceRunning];
-    service->State = service->Run(service->State, commandEngine);
+    service->State = service->Run(service->State, service->Data, commandEngine);
     ++commandEngine->ServiceRunning;
     return;
 }
@@ -324,7 +324,8 @@ static int StringToArgs(char *pRawString, char *argv[])
 {
     unsigned short argc = 0, i = 0, strsize = 0;
 
-    if(pRawString == NULL) {
+    if(pRawString == NULL)
+    {
         return 0;
     }
 
