@@ -1,6 +1,8 @@
 #ifndef COMMANDS_C
 #define	COMMANDS_C
 
+#include <stdbool.h>
+
 #include "commands.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +81,8 @@ void DoTasks(CommandEngine* commandEngine)
             commandEngine->ServiceRunning = 0;
             commandEngine->Status = CanRead;
             if (commandEngine->Prompt != NULL
-                    && commandEngine->RunningApplication == NULL) {
+                    && commandEngine->RunningApplication == NULL
+                    && commandEngine->KeystrokeReceived) {
                 commandEngine->WriteToOutput(commandEngine->Prompt);
             }
 
@@ -116,6 +119,20 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
     if (keystroke == NULL) {
         return;
     }
+    
+    if (!commandEngine->KeystrokeReceived) {
+        if (commandEngine->Intro != NULL) {
+            commandEngine->WriteToOutput(commandEngine->Intro);
+        }
+            
+        commandEngine->BufferPosition = 0;
+        commandEngine->CommandBuffer[commandEngine->BufferPosition] = NULL;
+        commandEngine->Status = Initialize;
+        
+        commandEngine->KeystrokeReceived = true;
+        
+        return;
+    }
 
     if (keystroke == RETURN_ASCII) {
         if (commandEngine->BufferPosition != 0) {
@@ -143,6 +160,15 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 break;
             case RETURN_ASCII:
                 // Do not print CRLF here
+                break;
+            case CTRL_C_ASCII:
+                // Clear the buffer and press 'enter'
+                commandEngine->Status = Initialize;
+                
+                commandEngine->BufferPosition = 0;
+                commandEngine->CommandBuffer[commandEngine->BufferPosition] = NULL;
+                
+                commandEngine->WriteToOutput(CMD_LF);
                 break;
             default:
                 if (keystroke > 31)

@@ -99,6 +99,7 @@ typedef struct CommandEngine {
     WriterMethodType WriteToOutput;
     WriterMethodType WriteError;
     const char* Prompt;
+    const char* Intro;
     // Private fields
     unsigned short BufferPosition;
     CommandEngineStatus Status;
@@ -106,6 +107,7 @@ typedef struct CommandEngine {
     byte ServiceCount;
     byte ServiceRunning;
     const Command * ParsedCommand;
+    byte KeystrokeReceived : 1;
 } CommandEngine;
 
 ////////////////////////////////////////////////////////////////////////////////
