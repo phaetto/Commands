@@ -4,9 +4,9 @@
 
 static byte* ServicesCommandImplementation(const char* args[], struct CommandEngine* commandEngine)
 {
-    commandEngine->WriteToOutput(CMD_MAKEBOLD CMD_MAKEGREEN CMD_LF 
-            CMD_LF " (*)" CMD_MAKEWHITE " Available services in this terminal"
-            CMD_LF CMD_LF CMD_CLEARATTRIBUTES);
+    commandEngine->WriteToOutput(CMD_MAKEBOLD CMD_MAKEGREEN CMD_CRLF 
+            CMD_CRLF " (*)" CMD_MAKEWHITE " Available services in this terminal"
+            CMD_CRLF CMD_CRLF CMD_CLEARATTRIBUTES);
 
     unsigned short i = 0;
     for(i = 0; commandEngine->RegisteredServices[i] != NULL; ++i)
@@ -31,12 +31,12 @@ static byte* ServicesCommandImplementation(const char* args[], struct CommandEng
         commandEngine->WriteToOutput(state);
         commandEngine->WriteToOutput("] / [0x");
         commandEngine->WriteToOutput(hex);
-        commandEngine->WriteToOutput("]" CMD_LF "\t");
+        commandEngine->WriteToOutput("]" CMD_CRLF "\t");
         commandEngine->WriteToOutput(description);
-        commandEngine->WriteToOutput(CMD_LF);
+        commandEngine->WriteToOutput(CMD_CRLF);
     }
 
-    commandEngine->WriteToOutput(CMD_LF);
+    commandEngine->WriteToOutput(CMD_CRLF);
 
     return (byte*)NULL;
 }

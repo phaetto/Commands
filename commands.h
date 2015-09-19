@@ -27,7 +27,7 @@ extern "C" {
 #define BACKSPACE_ASCII (0x7F)
 #define CTRL_C_ASCII (0x03)                 // ETX, End Of Text
 
-#define CMD_LF "\n"
+#define CMD_CRLF "\r\n"
 #define CMD_CLEARSCREEN "\x1B[2J\x1B[;H"
 #define CMD_MAKEWHITE "\x1B[37;40m"
 #define CMD_MAKEGREEN "\x1B[32;40m"

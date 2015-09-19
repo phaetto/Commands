@@ -140,7 +140,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
         }
         else {
             commandEngine->Status = Initialize;
-            commandEngine->WriteToOutput(CMD_LF);
+            commandEngine->WriteToOutput(CMD_CRLF);
         }
         return;
     }
@@ -168,7 +168,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 commandEngine->BufferPosition = 0;
                 commandEngine->CommandBuffer[commandEngine->BufferPosition] = NULL;
                 
-                commandEngine->WriteToOutput(CMD_LF);
+                commandEngine->WriteToOutput(CMD_CRLF);
                 break;
             default:
                 if (keystroke > 31)
@@ -186,9 +186,9 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                     hex[1] = TO_HEX(((keystroke & 0x0F)));
                     hex[2] = '\0';
 
-                    commandEngine->WriteError(CMD_LF "ASCII character 0x");
+                    commandEngine->WriteError(CMD_CRLF "ASCII character 0x");
                     commandEngine->WriteError(hex);
-                    commandEngine->WriteError(" is not supported." CMD_LF);
+                    commandEngine->WriteError(" is not supported." CMD_CRLF);
                 }
         }
 
@@ -199,7 +199,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
 
     // Buffer overflow, we have to lose data
     if (commandEngine->WriteError != NULL) {
-        commandEngine->WriteError(CMD_LF "Buffer overflow!" CMD_LF);
+        commandEngine->WriteError(CMD_CRLF "Buffer overflow!" CMD_CRLF);
     }
 }
 
@@ -288,9 +288,9 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
         if (commandEngine->RunningApplication != NULL) {
             commandEngine->Status = CanRead;
         } else if (commandEngine->WriteError != NULL) {
-            commandEngine->WriteError(CMD_LF "Command '");
+            commandEngine->WriteError(CMD_CRLF "Command '");
             commandEngine->WriteError(commandEngine->CommandBuffer);
-            commandEngine->WriteError("' not found" CMD_LF);
+            commandEngine->WriteError("' not found" CMD_CRLF);
         }
     }
 
