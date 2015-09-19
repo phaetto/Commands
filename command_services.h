@@ -1,0 +1,19 @@
+
+#ifndef COMMAND_SERVICES_H
+#define	COMMAND_SERVICES_H
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+// Exports
+////////////////////////////////////////////////////////////////////////////////
+extern const struct Command ServicesCommand;
+
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* COMMAND_SERVICES_H */
+
