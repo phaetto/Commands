@@ -163,7 +163,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
         if (keystroke != CTRL_C_ASCII) {
             // Feed all the characters synchronously in the application
             // It is the application's responsibility to be state-based
-            commandEngine->RunningApplication->Execute(keystroke, commandEngine);
+            commandEngine->RunningApplication->OnInput(keystroke, commandEngine);
         } else {
             CloseApplication(commandEngine);
         }

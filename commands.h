@@ -44,10 +44,10 @@ typedef unsigned char byte;
 
 typedef void (*WriterMethodType)(const char *string);
 typedef byte* (*CommandExecuteMethodType)(const char* args[], struct CommandEngine* commandEngine);
-typedef void (*ApplicationLoadMethodType)(const char* args[], struct CommandEngine* commandEngine);
-typedef void (*ExecuteApplicationMethodType)(const char input, struct CommandEngine* commandEngine);
-typedef void (*ApplicationMethodType)(struct CommandEngine* commandEngine);
-typedef byte (*ServiceMethodType)(byte state, void* data, struct CommandEngine* commandEngine);
+typedef void (*ApplicationOnStartMethodType)(const char* args[], struct CommandEngine* commandEngine);
+typedef void (*ApplicationOnInputMethodType)(const char input, struct CommandEngine* commandEngine);
+typedef void (*ApplicationOnCloseMethodType)(struct CommandEngine* commandEngine);
+typedef byte (*ServiceStateExecuteMethodType)(byte state, void* data, struct CommandEngine* commandEngine);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Structures
@@ -81,9 +81,9 @@ typedef struct Command {
 typedef struct Application {
     const char * Name;
     const char * HelpText;
-    ExecuteApplicationMethodType Execute;
-    ApplicationLoadMethodType OnStart;
-    ApplicationMethodType OnClose;
+    ApplicationOnInputMethodType OnInput;
+    ApplicationOnStartMethodType OnStart;
+    ApplicationOnCloseMethodType OnClose;
 } Application;
 
 //Service wellknow lifecycle states
@@ -95,7 +95,7 @@ typedef enum {
 typedef struct Service {
     const char * Name;
     const char * HelpText;
-    ServiceMethodType Run;
+    ServiceStateExecuteMethodType Run;
     byte State;
     void * Data;
 } Service;
@@ -125,8 +125,11 @@ typedef struct CommandEngine {
 // Public methods
 ////////////////////////////////////////////////////////////////////////////////
 
+// Basic command engine API
 void DoTasks(CommandEngine* commandEngine);
 void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke);
+
+// Application API
 void CloseApplication(CommandEngine* commandEngine);
 
 #ifdef	__cplusplus
