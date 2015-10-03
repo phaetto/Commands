@@ -36,7 +36,7 @@ extern "C" {
 #define CMD_MAKEBOLD "\x1B[1m"
 #define CMD_CLEARATTRIBUTES "\x1B[0m"
 
-#define TO_HEX(i) (i <= 9 ? '0' + i : 'A' - 10 + i)
+#define TO_HEX(i) ((i) <= 9 ? '0' + (i) : 'A' - 10 + (i))
 
 struct CommandEngine;
 
