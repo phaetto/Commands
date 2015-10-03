@@ -50,6 +50,7 @@ static short strcmp(const char * s1, const char * s2)
 
 static const Command* CheckCommand(struct CommandEngine* commandEngine);
 static void ExecuteCommand(struct CommandEngine* commandEngine, const Command* command);
+static void ExecuteApplication(CommandEngine* commandEngine);
 static void ExecuteService(CommandEngine* commandEngine);
 static int StringToArgs(char *pRawString, char *argv[]);
 
@@ -139,7 +140,7 @@ void DoTasks(CommandEngine* commandEngine)
             
             break;
         case ExecuteApplicationStatus:
-            // ExecuteApplicationLoop(commandEngine);
+            ExecuteApplication(commandEngine);
             commandEngine->Status = ExecuteServicesStatus;
             
             break;
@@ -353,6 +354,21 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
     commandEngine->BufferPosition = 0;
     commandEngine->CommandBuffer[commandEngine->BufferPosition] = NULL;
 
+    return;
+}
+
+static void ExecuteApplication(CommandEngine* commandEngine)
+{
+    if (commandEngine->RunningApplication == NULL)
+    {
+        return;
+    }
+
+    Application * app = commandEngine->RunningApplication;
+    if (app->Run != NULL)
+    {
+        app->State = app->Run(app->State, commandEngine);
+    }
     return;
 }
 

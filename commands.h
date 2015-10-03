@@ -47,6 +47,7 @@ typedef byte* (*CommandExecuteMethodType)(const char* args[], struct CommandEngi
 typedef void (*ApplicationOnStartMethodType)(const char* args[], struct CommandEngine* commandEngine);
 typedef void (*ApplicationOnInputMethodType)(const char input, struct CommandEngine* commandEngine);
 typedef void (*ApplicationOnCloseMethodType)(struct CommandEngine* commandEngine);
+typedef byte (*ApplicationOnStateExecuteMethodType)(byte step, struct CommandEngine* commandEngine);
 typedef byte (*ServiceStateExecuteMethodType)(byte state, void* data, struct CommandEngine* commandEngine);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,6 +85,9 @@ typedef struct Application {
     ApplicationOnInputMethodType OnInput;
     ApplicationOnStartMethodType OnStart;
     ApplicationOnCloseMethodType OnClose;
+    ApplicationOnStateExecuteMethodType Run;
+    // Private fields
+    byte State;
 } Application;
 
 //Service wellknow lifecycle states
@@ -114,7 +118,7 @@ typedef struct CommandEngine {
     unsigned short BufferPosition;
     CommandEngineStatus Status;
     KeyInputStatus KeyInputStatus;
-    const Application* RunningApplication;
+    Application* RunningApplication;
     byte ServiceCount;
     byte ServiceRunning;
     const Command * ParsedCommand;
