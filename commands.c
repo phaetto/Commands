@@ -69,33 +69,88 @@ void DoTasks(CommandEngine* commandEngine)
 {
     switch(commandEngine->Status)
     {
-        case CanParseForCommand:
-            commandEngine->ParsedCommand = CheckCommand(commandEngine);
-            commandEngine->Status = CanExecuteCommand;
-            break;
-        case CanExecuteCommand:
-            ExecuteCommand(commandEngine, commandEngine->ParsedCommand);
-            commandEngine->ParsedCommand = NULL;
-        case Initialize:
+        case InitializeStatus:
+            commandEngine->KeyInputStatus = ReadyForKeyInputStatus;
             commandEngine->ServiceCount = 0;
             commandEngine->ServiceRunning = 0;
-            commandEngine->Status = CanRead;
-            if (commandEngine->Prompt != NULL
-                    && commandEngine->RunningApplication == NULL
-                    && commandEngine->KeystrokeReceived) {
-                commandEngine->WriteToOutput(commandEngine->Prompt);
-            }
 
             while(commandEngine->RegisteredServices[commandEngine->ServiceCount] != NULL)
             {
                 ++commandEngine->ServiceCount;
             }
+            
+            commandEngine->Status = ReadyForInputStatus;
+            
             break;
-        case CanRead:
+        case ParseForCommandStatus:
+            commandEngine->ParsedCommand = CheckCommand(commandEngine);
+            
+            if (commandEngine->RunningApplication == NULL)
+            {
+                commandEngine->Status = ExecuteServicesStatus;
+            }
+            else
+            {
+                commandEngine->Status = ExecuteApplicationStatus;
+            }
+            
+            break;
+        case ExecuteCommandStatus:
+            ExecuteCommand(commandEngine, commandEngine->ParsedCommand);
+            commandEngine->ParsedCommand = NULL;
+            
+        case ReadyForInputStatus:
+            commandEngine->BufferPosition = 0;
+            
+            if (commandEngine->Prompt != NULL
+                    && commandEngine->RunningApplication == NULL
+                    && commandEngine->KeystrokeReceived)
+            {
+                commandEngine->WriteToOutput(commandEngine->Prompt);    
+            }
+            
+            commandEngine->Status = LoopStatus;
+            
+            break;
+        case LoopStatus:
+            
+            if (commandEngine->ParsedCommand != NULL)
+            {
+                commandEngine->Status = ExecuteCommandStatus;
+            }
+            else if (commandEngine->KeyInputStatus == ReadyToParseStatus)
+            {
+                commandEngine->Status = ParseForCommandStatus;
+                commandEngine->KeyInputStatus = ReadyForKeyInputStatus;
+            }
+            else if (commandEngine->KeyInputStatus == ReadyToShowPromptStatus)
+            {
+                commandEngine->Status = ReadyForInputStatus;
+                commandEngine->KeyInputStatus = ReadyForKeyInputStatus;
+            }
+            else if (commandEngine->RunningApplication == NULL)
+            {
+                commandEngine->Status = ExecuteServicesStatus;
+            }
+            else
+            {
+                commandEngine->Status = ExecuteApplicationStatus;
+            }
+            
+            break;
+        case ExecuteApplicationStatus:
+            // ExecuteApplicationLoop(commandEngine);
+            commandEngine->Status = ExecuteServicesStatus;
+            
+            break;
+        case ExecuteServicesStatus:
             ExecuteService(commandEngine);
+            commandEngine->Status = LoopStatus;
+            
             break;
         default:
-            commandEngine->Status = Initialize;
+            commandEngine->Status = InitializeStatus;
+            
             break;
     }
 
@@ -127,7 +182,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
             
         commandEngine->BufferPosition = 0;
         commandEngine->CommandBuffer[commandEngine->BufferPosition] = NULL;
-        commandEngine->Status = Initialize;
+        commandEngine->KeyInputStatus = ReadyToShowPromptStatus;
         
         commandEngine->KeystrokeReceived = true;
         
@@ -136,10 +191,10 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
 
     if (keystroke == RETURN_ASCII) {
         if (commandEngine->BufferPosition != 0) {
-            commandEngine->Status = CanParseForCommand;
+            commandEngine->KeyInputStatus = ReadyToParseStatus;
         }
         else {
-            commandEngine->Status = Initialize;
+            commandEngine->KeyInputStatus = ReadyToShowPromptStatus;
             commandEngine->WriteToOutput(CMD_CRLF);
         }
         return;
@@ -163,7 +218,7 @@ void AddKeystroke(CommandEngine* commandEngine, unsigned char keystroke)
                 break;
             case CTRL_C_ASCII:
                 // Clear the buffer and press 'enter'
-                commandEngine->Status = Initialize;
+                commandEngine->KeyInputStatus = ReadyToShowPromptStatus;
                 
                 commandEngine->BufferPosition = 0;
                 commandEngine->CommandBuffer[commandEngine->BufferPosition] = NULL;
@@ -269,6 +324,15 @@ static const Command* CheckCommand(struct CommandEngine* commandEngine)
             break;
         }
     }
+    
+    if (commandEngine->RunningApplication == NULL && commandEngine->WriteError != NULL)
+    {
+        commandEngine->WriteError(CMD_CRLF "Command '");
+        commandEngine->WriteError(commandName);
+        commandEngine->WriteError("' not found" CMD_CRLF);
+        
+        commandEngine->KeyInputStatus = ReadyToShowPromptStatus;
+    }
 
     return (Command*) NULL;
 }
@@ -283,14 +347,6 @@ static void ExecuteCommand(CommandEngine* commandEngine, const Command* command)
             if (output != NULL) {
                 commandEngine->WriteToOutput(output);
             }
-        }
-    } else {
-        if (commandEngine->RunningApplication != NULL) {
-            commandEngine->Status = CanRead;
-        } else if (commandEngine->WriteError != NULL) {
-            commandEngine->WriteError(CMD_CRLF "Command '");
-            commandEngine->WriteError(commandEngine->CommandBuffer);
-            commandEngine->WriteError("' not found" CMD_CRLF);
         }
     }
 
@@ -339,8 +395,8 @@ void CloseApplication(CommandEngine* commandEngine)
         commandEngine->RunningApplication->OnClose(commandEngine);
     }
 
-    commandEngine->Status = Initialize;
     commandEngine->RunningApplication = NULL;
+    commandEngine->KeyInputStatus = ReadyToShowPromptStatus;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

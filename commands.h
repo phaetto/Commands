@@ -55,12 +55,22 @@ typedef byte (*ServiceMethodType)(byte state, void* data, struct CommandEngine* 
 
 // Application state lifecycle
 typedef enum {
-    Initialize = 0x00,
-    CanRead = 0x01,
-    CanWrite = 0x02, // TODO
-    CanParseForCommand = 0x04,
-    CanExecuteCommand = 0x08,
+    InitializeStatus = 0x00,
+    ReadyForInputStatus,
+    LoopStatus,
+    WriteStatus, // TODO
+    ParseForCommandStatus,
+    ExecuteCommandStatus,
+    ExecuteApplicationStatus,
+    ExecuteServicesStatus,
+    ExecuteServicesBetweenParseAndExecuteStatus,
 } CommandEngineStatus;
+
+typedef enum {
+    ReadyForKeyInputStatus = 0x00,
+    ReadyToParseStatus,
+    ReadyToShowPromptStatus,
+} KeyInputStatus;
 
 typedef struct Command {
     const char * Name;
@@ -103,6 +113,7 @@ typedef struct CommandEngine {
     // Private fields
     unsigned short BufferPosition;
     CommandEngineStatus Status;
+    KeyInputStatus KeyInputStatus;
     const Application* RunningApplication;
     byte ServiceCount;
     byte ServiceRunning;
